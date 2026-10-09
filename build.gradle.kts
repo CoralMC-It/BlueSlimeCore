@@ -42,8 +42,9 @@ allprojects {
     apply(plugin = "java")
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        sourceCompatibility = JavaVersion.VERSION_1_8
+        val selectedDevPaper = providers.gradleProperty("platform").orNull == "paper"
+        sourceCompatibility = if (selectedDevPaper) JavaVersion.VERSION_25 else JavaVersion.VERSION_21
+        targetCompatibility = if (selectedDevPaper) JavaVersion.VERSION_25 else JavaVersion.VERSION_21
         toolchain.languageVersion.set(JavaLanguageVersion.of(25))
         withSourcesJar()
         withJavadocJar()

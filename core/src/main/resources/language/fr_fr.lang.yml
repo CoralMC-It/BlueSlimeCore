@@ -1,0 +1,67 @@
+language-name: fr_fr
+decimal-format: '0.00'
+language-test:
+  invalid-language: <red>The target does not have a valid language.</red>
+  language-code: '<green>Language Code: <gray>{language_code}</gray></green>'
+  java-locale: '<green>Java Locale: <gray>{java_locale}</gray></green>'
+  message: <green>Message Test</green>
+  broadcast: <bold><green>Broadcast Test</green></bold>
+  action-bar: <green>Action Bar Test</green>
+  sound:
+    sound: minecraft:block.beacon.activate
+    category: master
+    volume: 1.0
+    pitch: 1.0
+  title:
+    title: <green>Title Test</green>
+    subtitle: <green>Subtitle Test</green>
+    fade-in: 20
+    stay: 20
+    fade-out: 20
+  complete: <green>The language test is finished.</green>
+error:
+  player-only: '%tongue_blueslimecore:error.player-only%'
+  console-only: '%tongue_blueslimecore:error.console-only%'
+  invalid-held-item: '%tongue_blueslimecore:error.invalid-held-item%'
+  invalid-world: '%tongue_blueslimecore:error.invalid-world%'
+  world-required: '%tongue_blueslimecore:error.world-required%'
+  no-permission: '%tongue_blueslimecore:error.no-permission%'
+  invalid-target: '%tongue_blueslimecore:error.invalid-target%'
+command:
+  global-gamerule:
+    unknown-gamerule: <red>Unknown gamerule type <gray>{value}</gray>.</red>
+    list-title: <white><bold>Game Rule Values for <gray>{rule}</gray>:</bold></white>
+    list-line-format: <gray><bold>{world}:</bold></gray> <white>{value}</white>
+    success-count: <green>Successfully changed game rule <gray>{rule}</gray> to value <gray>{value}</gray> in <gray>{count}</gray> worlds.</green>
+    failure-count: <red>Failed to change game rule <gray>{rule}</gray> in <gray>{count}</gray> worlds.</red>
+  debug-event:
+    invalid-priority: <red>Unknown EventPriority type <gray>{value}</gray>.</red>
+    invalid-event-class: <red>Unknown or invalid event class <gray>{value}</gray>.</red>
+    reflection-error: <red>Failed to debug that event. Check the server console for errors.</red>
+    results-title: <white>Debug Results for event <gray>{event}</gray> and priority <gray>{priority}</gray>:</white>
+    results-none: <red>Event <gray>{event}</gray> does not have any listeners with priority <gray>{priority}</gray>.</red>
+  blueslimecore:
+    help:
+      title: <white><bold>BlueSlimeCore Commands:</bold></white>
+      command-list:
+      - '<aqua>/bscore help</aqua><gray>: Show this list of commands.</gray>'
+      - '<aqua>/bscore reload</aqua><gray>: Reload the configuration files for BlueSlimeCore.</gray>'
+      - '<aqua>/bscore language-test [player]</aqua><gray>: Send language test messages.'
+      - '<aqua>/debug-event</aqua><gray>: Show information about which classes are listing to an event (console only)</gray>'
+      - '<aqua>/global-gamerule</aqua><gray>: Change a gamerule for every world on the server.</gray>'
+      - '<aqua>/item-info</aqua><gray>: Show information about the material and damage of an item.</gray>'
+      - '<aqua>/item-to-base64</aqua><gray>: Convert an item to a binary base64 string.</gray>'
+      - '<aqua>/item-to-nbt</aqua><gray>: Convert an item to its NBT format.</gray>'
+      - '<aqua>/item-to-yml</aqua><gray>: Convert an item to a serialized Bukkit YAML format.</gray>'
+      - ''
+    reload-success: <green>Successfully reloaded the configuration file</green>
+  item-info:
+    modern:
+    - ''
+    - <white><bold>XMaterial:</bold></white> <gray>{xmaterial}</gray>
+    - <white><bold>Bukkit Material:</bold></white> <gray>{material}</gray>
+    - <white><bold>Vanilla ID:</bold></white> <gray>{vanilla}</gray>
+    legacy:
+    - ''
+    - <aqua><bold>Deprecated ID:</bold></aqua> <gray>{material_id}</gray>
+    - <aqua><bold>Deprecated Data:</bold></aqua> <gray>{data}</gray>

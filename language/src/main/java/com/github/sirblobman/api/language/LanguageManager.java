@@ -93,6 +93,7 @@ public final class LanguageManager {
     private AudienceProvider audienceProvider;
     private Language defaultLanguage;
     private Language consoleLanguage;
+    private TongueLanguage tongue;
 
 
     public LanguageManager(@NotNull ConfigurationManager configurationManager) {
@@ -196,13 +197,16 @@ public final class LanguageManager {
     }
 
     private @Nullable Language getPlayerLanguage(@NotNull Player player) {
-        printDebug("Detected getPlayerLanguage for player '" + player.getName() + "'.");
-        String cachedLocale = getCachedLocale(player);
-        printDebug("Cached Locale Name: " + cachedLocale);
-        return getLanguage(cachedLocale);
+        if (this.tongue != null) {
+            String language = this.tongue.locale(player).getLanguage();
+            String name = "fr".equals(language) ? "fr_fr" : "en".equals(language) ? "en_us" : "it_it";
+            return getLanguage(name);
+        }
+        return getLanguage(getCachedLocale(player));
     }
 
     public @Nullable Language getLanguage(@Nullable CommandSender sender) {
+        if (sender instanceof Player && this.tongue != null) return getPlayerLanguage((Player) sender);
         if (this.forceDefaultLanguage) {
             return getDefaultLanguage();
         }
@@ -235,8 +239,25 @@ public final class LanguageManager {
             }
 
             this.audienceProvider = BukkitAudiences.create(plugin);
+            this.tongue = new TongueLanguage(plugin);
             printDebug("Successfully created BukkitAudiences instance.");
         }
+    }
+
+    public void onPluginDisable() {
+        if (this.tongue != null) {
+            this.tongue.close();
+            this.tongue = null;
+        }
+        if (this.audienceProvider != null) {
+            this.audienceProvider.close();
+            this.audienceProvider = null;
+        }
+    }
+
+    /** Localizes unnamed entity types while custom entity/player names remain caller-owned. */
+    public @NotNull Component getEntityType(@NotNull Player viewer, @NotNull org.bukkit.entity.EntityType type) {
+        return this.tongue.entityType(viewer, type);
     }
 
     public void saveDefaultLanguageFiles() {
@@ -285,6 +306,7 @@ public final class LanguageManager {
     public void reloadLanguages() {
         reloadLanguageSettings();
         reloadLanguageFiles();
+        if (this.tongue != null) this.tongue.reload();
 
         int languageCount = this.languageMap.size();
         Logger logger = getLogger();
@@ -445,7 +467,8 @@ public final class LanguageManager {
         }
 
         LanguageConfiguration configuration = language.getConfiguration();
-        return configuration.getRawMessage(key);
+        String configured = configuration.getRawMessage(key);
+        return this.tongue == null ? configured : this.tongue.resolveRaw(audience, configured);
     }
 
     public @NotNull String getMessageString(@Nullable CommandSender audience, @NotNull String key,
@@ -478,6 +501,7 @@ public final class LanguageManager {
 
         LanguageConfiguration configuration = language.getConfiguration();
         List<Component> messages = configuration.getMessageList(key);
+        if (this.tongue != null) messages = this.tongue.lines(audience, messages);
 
         if (this.usePlaceholderAPI) {
             List<Component> newMessages = new ArrayList<>();
@@ -516,6 +540,7 @@ public final class LanguageManager {
 
         LanguageConfiguration configuration = language.getConfiguration();
         Component message = configuration.getMessage(key);
+        if (this.tongue != null) message = this.tongue.resolve(audience, message);
 
         if (this.usePlaceholderAPI) {
             message = replacePlaceholderAPI(audience, message);
@@ -565,6 +590,7 @@ public final class LanguageManager {
         LanguageConfiguration configuration = language.getConfiguration();
         ModifiableMessage modifiable = configuration.getModifiableMessage(key);
         Component message = modifiable.getMessage();
+        if (this.tongue != null) message = this.tongue.resolve(audience, message);
 
         if (this.usePlaceholderAPI) {
             message = replacePlaceholderAPI(audience, message);
@@ -597,6 +623,10 @@ public final class LanguageManager {
 
         Component titleMessage = title.title();
         Component subtitleMessage = title.subtitle();
+        if (this.tongue != null) {
+            titleMessage = this.tongue.resolve(audience, titleMessage);
+            subtitleMessage = this.tongue.resolve(audience, subtitleMessage);
+        }
 
         if (this.usePlaceholderAPI) {
             titleMessage = replacePlaceholderAPI(audience, titleMessage);
@@ -629,6 +659,10 @@ public final class LanguageManager {
 
         Component headerMessage = playerListInfo.getHeader();
         Component footerMessage = playerListInfo.getFooter();
+        if (this.tongue != null) {
+            headerMessage = this.tongue.resolve(audience, headerMessage);
+            footerMessage = this.tongue.resolve(audience, footerMessage);
+        }
 
         if (this.usePlaceholderAPI) {
             headerMessage = replacePlaceholderAPI(audience, headerMessage);

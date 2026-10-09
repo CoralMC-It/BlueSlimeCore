@@ -47,7 +47,6 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.dedicated.DedicatedPlayerList;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.ProblemReporter;
@@ -78,15 +77,7 @@ public final class ItemHandler_26_1_R1 extends ItemHandler {
 
     @Override
     public @NotNull String getKeyString(@NotNull ItemStack item) {
-        Material material = item.getType();
-        if (material.isRegistered()) {
-            NamespacedKey key = material.getKeyOrNull();
-            if (key != null) {
-                return key.toString();
-            }
-        }
-
-        return "minecraft:air";
+        return item.getType().getKey().toString();
     }
 
     @Override
@@ -303,7 +294,8 @@ public final class ItemHandler_26_1_R1 extends ItemHandler {
 
     private @NotNull Component convert(@NotNull net.minecraft.network.chat.Component  component) {
         RegistryAccess registry = CraftRegistry.getMinecraftRegistry();
-        String json = CraftChatMessage.ChatSerializer.toJson(component, registry);
+        String json = net.minecraft.network.chat.ComponentSerialization.CODEC.encodeStart(
+                registry.createSerializationContext(com.mojang.serialization.JsonOps.INSTANCE), component).getOrThrow().toString();
         GsonComponentSerializer serializer = GsonComponentSerializer.gson();
         return serializer.deserialize(json);
     }
@@ -313,12 +305,9 @@ public final class ItemHandler_26_1_R1 extends ItemHandler {
         String json = serializer.serialize(component);
 
         RegistryAccess registry = CraftRegistry.getMinecraftRegistry();
-        MutableComponent nmsComponent = CraftChatMessage.ChatSerializer.fromJson(json, registry);
-        if (nmsComponent != null) {
-            return nmsComponent;
-        }
-
-        return net.minecraft.network.chat.Component.literal(json);
+        return net.minecraft.network.chat.ComponentSerialization.CODEC.parse(
+                registry.createSerializationContext(com.mojang.serialization.JsonOps.INSTANCE),
+                com.google.gson.JsonParser.parseString(json)).getOrThrow();
     }
 
     private int getCurrentDataVersion() {

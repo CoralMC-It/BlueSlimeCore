@@ -15,7 +15,11 @@ This library is also free for other developers to use.
 
 ### Version Information
 
-BlueSlimeCore requires Java 25.
+The Dev Tongue fork builds with the Java 25 toolchain and publishes Java 21 module variants, including the language API required by Tongue 1.5.0. The target Dev server runs Java 25; this fork no longer advertises Java 8 compatibility.
+The legacy 1.17–1.20.3 NMS adapters retain their server-version dependencies and hooks but compile as Java 21 variants with the Java 25 toolchain, matching the shared API modules. This is a bytecode/runtime modernization, not removal of those adapters.
+
+For the SMP Dev backend, build and publish with `-Pplatform=paper -PserverVersion=26.2 :core:shadowJar :core:publishToMavenLocal` (use `26.1.2` for that server version). This selects the real matching Paper development bundle and packages the 26_1_R1, Paper and fallback adapters without resolving unrelated private legacy server artifacts. Upstream VersionUtility maps both 26.1.2 and 26.2 to 26_1_R1; this is its historical adapter name, not a runtime downgrade. The selected build emits Java 25 variants; downstream CombatLogX must use the same `-Pplatform=paper` option. The default multi-version dependency graph and all adapter sources remain available without that option. Runtime handler lookup is reflective for versioned adapters, so the selected jar has no static links to excluded legacy adapters.
+
 
 BlueSlimeCore supports Spigot, Paper, and Folia. Custom forks may work, but they are untested. 
 The following table is a list of versions that are included in code. 
@@ -49,6 +53,7 @@ We only provide support for tested software and recommended versions.
 ### Features for Developers
 * Configuration management system for saving and loading of multiple files.
 * Language management system with support for per-player languages, MiniMessage, and PlaceholderAPI.
+* Dev Tongue integration resolves `%tongue_namespace:key%` configuration references to rich components for each receiver before PlaceholderAPI; player locale selection uses Tongue rather than client/global language. The shaded/unshaded Adventure boundary is bridged with JSON, preserving click and hover events. Native custom text, sound/title timing and message delivery settings remain configured normally. Staff/console language behavior is unchanged.
 * Ability to send action bars, titles, and sounds through the language API.
 * Command system with player checking and sub commands.
 * Plugin update checking with SpigotMC or Hangar.

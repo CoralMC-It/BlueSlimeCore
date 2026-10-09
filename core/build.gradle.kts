@@ -4,7 +4,7 @@ import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 import net.minecrell.pluginyml.paper.PaperPluginDescription
 
 val pluginVersion = rootProject.version.toString()
-val pluginSoftDepend = listOf("Factions", "FactionsUUID", "FactionsX", "LegacyFactions", "PlaceholderAPI")
+val pluginSoftDepend = listOf("Factions", "FactionsUUID", "FactionsX", "LegacyFactions", "PlaceholderAPI", "Tongue")
 
 repositories {
     maven("https://repo.aikar.co/nexus/content/groups/aikar/")

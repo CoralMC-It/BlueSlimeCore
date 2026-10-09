@@ -170,6 +170,7 @@ public abstract class Command implements TabExecutor {
 
             pluginCommand.setExecutor(this);
             pluginCommand.setTabCompleter(this);
+            if (getLanguageManager() != null) pluginCommand.setPermission(null);
             printDebug("Registered command using classic Spigot method.");
         }
     }
@@ -198,7 +199,7 @@ public abstract class Command implements TabExecutor {
             commandData.setUsage(usage);
         }
 
-        if (permission != null) {
+        if (permission != null && getLanguageManager() == null) {
             commandData.setPermission(permission);
         }
 
@@ -542,6 +543,8 @@ public abstract class Command implements TabExecutor {
     public final @NotNull List<String> onTabComplete(@NotNull CommandSender sender,
                                                      @NotNull org.bukkit.command.Command command,
                                                      @NotNull String label, String @NotNull [] args) {
+        Permission rootPermission = getPermission();
+        if (rootPermission != null && !checkPermission(sender, rootPermission, false)) return Collections.emptyList();
         if (args.length == 0) {
             // Nothing to tab complete.
             return Collections.emptyList();
@@ -593,6 +596,10 @@ public abstract class Command implements TabExecutor {
     @Override
     public final boolean onCommand(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command,
                                    @NotNull String label, String @NotNull [] args) {
+        Permission permission = getPermission();
+        if (permission != null && !checkPermission(sender, permission, true)) {
+            return true;
+        }
         if (args.length >= 1) {
             String subCommandName = args[0].toLowerCase(Locale.US);
             Map<String, Command> subCommandMap = getSubCommands();
@@ -603,10 +610,6 @@ public abstract class Command implements TabExecutor {
             }
         }
 
-        Permission permission = getPermission();
-        if (permission != null && !checkPermission(sender, permission, true)) {
-            return true;
-        }
 
         return execute(sender, args);
     }
