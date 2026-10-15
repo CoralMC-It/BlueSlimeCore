@@ -17,6 +17,7 @@ This library is also free for other developers to use.
 
 The Dev Tongue fork builds with the Java 25 toolchain and publishes Java 21 module variants, including the language API required by Tongue 1.5.0. The target Dev server runs Java 25; this fork no longer advertises Java 8 compatibility.
 The legacy 1.17–1.20.3 NMS adapters retain their server-version dependencies and hooks but compile as Java 21 variants with the Java 25 toolchain, matching the shared API modules. This is a bytecode/runtime modernization, not removal of those adapters.
+The Paper descriptor requires Tongue and joins its classpath before BlueSlimeCore loads: `LanguageManager` always constructs the Tongue-backed language provider. Keep Tongue installed when using this fork.
 
 For the SMP Dev backend, build and publish with `-Pplatform=paper -PserverVersion=26.2 :core:shadowJar :core:publishToMavenLocal` (use `26.1.2` for that server version). This selects the real matching Paper development bundle and packages the 26_1_R1, Paper and fallback adapters without resolving unrelated private legacy server artifacts. Upstream VersionUtility maps both 26.1.2 and 26.2 to 26_1_R1; this is its historical adapter name, not a runtime downgrade. The selected build emits Java 25 variants; downstream CombatLogX must use the same `-Pplatform=paper` option. The default multi-version dependency graph and all adapter sources remain available without that option. Runtime handler lookup is reflective for versioned adapters, so the selected jar has no static links to excluded legacy adapters.
 
