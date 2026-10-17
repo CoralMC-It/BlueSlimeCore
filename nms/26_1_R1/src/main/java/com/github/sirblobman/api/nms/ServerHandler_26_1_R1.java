@@ -1,6 +1,5 @@
 package com.github.sirblobman.api.nms;
 
-import java.util.Arrays;
 
 import org.bukkit.craftbukkit.CraftServer;
 import org.jetbrains.annotations.NotNull;
@@ -9,7 +8,6 @@ import org.bukkit.Server;
 import org.bukkit.command.CommandMap;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import net.minecraft.server.MinecraftServer;
 
 public final class ServerHandler_26_1_R1 extends ServerHandler {
     public ServerHandler_26_1_R1(JavaPlugin plugin) {
@@ -24,14 +22,7 @@ public final class ServerHandler_26_1_R1 extends ServerHandler {
 
     @Override
     public double @NotNull [] getServerTpsValues() {
-        Server server = getServer();
-        if (!(server instanceof CraftServer)) {
-            return new double[] {20.0D, 20.0D, 20.0D};
-        }
-
-        CraftServer craftServer = (CraftServer) server;
-        MinecraftServer minecraftServer = craftServer.getServer();
-        return Arrays.copyOf(minecraftServer.recentTps, 3);
+        return com.github.sirblobman.api.utility.paper.PaperHelper.getServerTpsValues();
     }
 
     @Override

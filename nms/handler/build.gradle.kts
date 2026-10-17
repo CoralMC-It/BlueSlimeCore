@@ -26,21 +26,27 @@ dependencies {
     // NMS Versions
     implementation(project(":nms:fallback")) // NMS Fallback
     implementation(project(":nms:paper")) // NMS Paper
-    implementation(project(":nms:1_8_R3")) // NMS 1.8.8
-    implementation(project(":nms:1_12_R1")) // NMS 1.12.2
-    implementation(project(":nms:1_16_R3")) // NMS 1.16.5
-    implementation(project(path = ":nms:1_17_R1", configuration = "remap")) // NMS 1.17.1
-    implementation(project(path = ":nms:1_18_R2", configuration = "remap")) // NMS 1.18.2
-    implementation(project(path = ":nms:1_19_R3", configuration = "remap")) // NMS 1.19.4
-    implementation(project(path = ":nms:1_20_R1", configuration = "remap")) // NMS 1.20.1
-    implementation(project(path = ":nms:1_20_R3", configuration = "remap")) // NMS 1.20.4
-    implementation(project(path = ":nms:1_20_R4", configuration = "remap")) // NMS 1.20.6
-    implementation(project(path = ":nms:1_21_R3", configuration = "remap")) // NMS 1.21.4
-    implementation(project(path = ":nms:1_21_R4", configuration = "remap")) // NMS 1.21.5
-    implementation(project(path = ":nms:1_21_R5", configuration = "remap")) // NMS 1.21.8
-    implementation(project(path = ":nms:1_21_R6", configuration = "remap")) // NMS 1.21.10
-    implementation(project(path = ":nms:1_21_R7", configuration = "remap")) // NMS 1.21.11
-    implementation(project(path = ":nms:26_1_R1", configuration = "remap")) // NMS 26.3
+    if (providers.gradleProperty("platform").orNull == "paper") {
+        val serverVersion = providers.gradleProperty("serverVersion").getOrElse("26.1.2")
+        require(serverVersion in setOf("26.1.2", "26.2")) { "The selected Dev Paper build supports serverVersion=26.1.2 or 26.2." }
+        implementation(project(path = ":nms:26_1_R1", configuration = "remap"))
+    } else {
+        implementation(project(":nms:1_8_R3")) // NMS 1.8.8
+        implementation(project(":nms:1_12_R1")) // NMS 1.12.2
+        implementation(project(":nms:1_16_R3")) // NMS 1.16.5
+        implementation(project(path = ":nms:1_17_R1", configuration = "remap"))
+        implementation(project(path = ":nms:1_18_R2", configuration = "remap"))
+        implementation(project(path = ":nms:1_19_R3", configuration = "remap"))
+        implementation(project(path = ":nms:1_20_R1", configuration = "remap"))
+        implementation(project(path = ":nms:1_20_R3", configuration = "remap"))
+        implementation(project(path = ":nms:1_20_R4", configuration = "remap"))
+        implementation(project(path = ":nms:1_21_R3", configuration = "remap"))
+        implementation(project(path = ":nms:1_21_R4", configuration = "remap"))
+        implementation(project(path = ":nms:1_21_R5", configuration = "remap"))
+        implementation(project(path = ":nms:1_21_R6", configuration = "remap"))
+        implementation(project(path = ":nms:1_21_R7", configuration = "remap"))
+        implementation(project(path = ":nms:26_1_R1", configuration = "remap"))
+    }
 }
 
 tasks {

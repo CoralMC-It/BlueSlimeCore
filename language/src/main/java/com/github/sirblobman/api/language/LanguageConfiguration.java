@@ -145,6 +145,11 @@ public final class LanguageConfiguration {
             modifiableMessage.setType(messageType);
             return modifiableMessage;
         } else {
+            if (originalConfiguration.isSet(path)) {
+                ModifiableMessage modifiableMessage = new ModifiableMessage();
+                modifiableMessage.setMessage(getMessage(path));
+                return modifiableMessage;
+            }
             Optional<LanguageConfiguration> optionalParent = getParent();
             if (optionalParent.isPresent()) {
                 LanguageConfiguration parent = optionalParent.get();

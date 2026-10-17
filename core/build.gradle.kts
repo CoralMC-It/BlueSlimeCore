@@ -4,7 +4,7 @@ import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 import net.minecrell.pluginyml.paper.PaperPluginDescription
 
 val pluginVersion = rootProject.version.toString()
-val pluginSoftDepend = listOf("Factions", "FactionsUUID", "FactionsX", "LegacyFactions", "PlaceholderAPI")
+val pluginSoftDepend = listOf("Factions", "FactionsUUID", "FactionsX", "LegacyFactions", "PlaceholderAPI", "Tongue")
 
 repositories {
     maven("https://repo.aikar.co/nexus/content/groups/aikar/")
@@ -236,7 +236,9 @@ paper {
     authors = listOf("SirBlobman")
 
     dependencies {
-        pluginSoftDepend.forEach { it -> quickRegister(serverDependencies, it, false) }
+        // LanguageManager always creates TongueLanguage, so Paper must load Tongue first and fail fast without it.
+        quickRegister(serverDependencies, "Tongue", true)
+        pluginSoftDepend.filter { it != "Tongue" }.forEach { quickRegister(serverDependencies, it, false) }
     }
 
     permissions {

@@ -77,6 +77,7 @@ public final class CorePlugin extends ConfigurablePlugin {
     @Override
     public void onDisable() {
         HandlerList.unregisterAll(this);
+        getLanguageManager().onPluginDisable();
     }
 
     @Override
