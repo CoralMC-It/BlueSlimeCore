@@ -77,10 +77,12 @@ fun getProp(propertyName: String): String {
 
 publishing {
     repositories {
-        maven("https://nexus.sirblobman.xyz/public/") {
+        // CoralMC fork: published only to the CoralMC repository, never to the upstream nexus.
+        maven("https://repo.coralmc.it/releases") {
+            name = "coralmc"
             credentials {
-                username = getEnvOrProp("MAVEN_DEPLOY_USR", "maven.username.sirblobman")
-                password = getEnvOrProp("MAVEN_DEPLOY_PSW", "maven.password.sirblobman")
+                username = providers.gradleProperty("mavenUser").orNull
+                password = providers.gradleProperty("mavenPassword").orNull
             }
         }
     }
