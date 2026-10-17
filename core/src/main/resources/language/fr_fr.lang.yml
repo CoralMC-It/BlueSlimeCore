@@ -20,13 +20,13 @@ language-test:
     fade-out: 20
   complete: <green>The language test is finished.</green>
 error:
-  player-only: '%tongue_blueslimecore:error.player-only%'
-  console-only: '%tongue_blueslimecore:error.console-only%'
-  invalid-held-item: '%tongue_blueslimecore:error.invalid-held-item%'
-  invalid-world: '%tongue_blueslimecore:error.invalid-world%'
-  world-required: '%tongue_blueslimecore:error.world-required%'
-  no-permission: '%tongue_blueslimecore:error.no-permission%'
-  invalid-target: '%tongue_blueslimecore:error.invalid-target%'
+  player-only: '<red>Seuls les joueurs peuvent exécuter cette commande.</red>'
+  console-only: '<red>Cette commande doit être exécutée dans la console du serveur.</red>'
+  invalid-held-item: '<red>Vous devez tenir un objet valide pour utiliser cette commande.</red>'
+  invalid-world: '<red>Vous devez être dans un monde valide pour utiliser cette commande.</red>'
+  world-required: '<red>Le serveur doit avoir au moins un monde pour utiliser cette commande.</red>'
+  no-permission: '<red>Permission manquante : <gray>{permission}</gray>.</red>'
+  invalid-target: '<red><gray>{target}</gray> n’est pas en ligne ou n’existe pas.</red>'
 command:
   global-gamerule:
     unknown-gamerule: <red>Unknown gamerule type <gray>{value}</gray>.</red>

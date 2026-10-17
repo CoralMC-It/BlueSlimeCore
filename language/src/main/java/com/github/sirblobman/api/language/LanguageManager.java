@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.MatchResult;
@@ -94,6 +95,7 @@ public final class LanguageManager {
     private Language defaultLanguage;
     private Language consoleLanguage;
     private TongueLanguage tongue;
+    private final Map<Locale, Language> tongueLanguageCache = new ConcurrentHashMap<>();
 
 
     public LanguageManager(@NotNull ConfigurationManager configurationManager) {
@@ -197,16 +199,71 @@ public final class LanguageManager {
     }
 
     private @Nullable Language getPlayerLanguage(@NotNull Player player) {
+        printDebug("Detected getPlayerLanguage for player '" + player.getName() + "'.");
         if (this.tongue != null) {
-            String language = this.tongue.locale(player).getLanguage();
-            String name = "fr".equals(language) ? "fr_fr" : "en".equals(language) ? "en_us" : "it_it";
-            return getLanguage(name);
+            return getTongueLanguage(this.tongue.locale(player));
         }
-        return getLanguage(getCachedLocale(player));
+
+        String cachedLocale = getCachedLocale(player);
+        printDebug("Cached Locale Name: " + cachedLocale);
+        return getLanguage(cachedLocale);
+    }
+
+    /**
+     * Maps a Tongue locale to a loaded language file: exact {@code language_country}, then {@code language_language}
+     * ({@code en_us} for English), then the default language if it has the same language, then the first loaded file
+     * of that language; locales without a loaded file use the configured default language.
+     */
+    private @Nullable Language getTongueLanguage(@NotNull Locale locale) {
+        Language cached = this.tongueLanguageCache.get(locale);
+        if (cached != null) {
+            return cached;
+        }
+
+        Language language = findTongueLanguage(locale);
+        if (language != null) {
+            this.tongueLanguageCache.put(locale, language);
+        }
+
+        return language;
+    }
+
+    private @Nullable Language findTongueLanguage(@NotNull Locale locale) {
+        Language defaultLanguage = getDefaultLanguage();
+        String language = locale.getLanguage().toLowerCase(Locale.ROOT);
+        if (language.isEmpty()) {
+            return defaultLanguage;
+        }
+
+        String country = locale.getCountry().toLowerCase(Locale.ROOT);
+        if (!country.isEmpty()) {
+            Language exact = this.languageMap.get(language + "_" + country);
+            if (exact != null) {
+                return exact;
+            }
+        }
+
+        Language primary = this.languageMap.get("en".equals(language) ? "en_us" : language + "_" + language);
+        if (primary != null) {
+            return primary;
+        }
+
+        String prefix = language + "_";
+        if (this.defaultLanguageName != null && this.defaultLanguageName.startsWith(prefix)) {
+            return defaultLanguage;
+        }
+
+        String match = null;
+        for (String name : this.languageMap.keySet()) {
+            if (name.startsWith(prefix) && (match == null || name.compareTo(match) < 0)) {
+                match = name;
+            }
+        }
+
+        return (match != null ? this.languageMap.get(match) : defaultLanguage);
     }
 
     public @Nullable Language getLanguage(@Nullable CommandSender sender) {
-        if (sender instanceof Player && this.tongue != null) return getPlayerLanguage((Player) sender);
         if (this.forceDefaultLanguage) {
             return getDefaultLanguage();
         }
@@ -239,8 +296,12 @@ public final class LanguageManager {
             }
 
             this.audienceProvider = BukkitAudiences.create(plugin);
-            this.tongue = new TongueLanguage(plugin);
             printDebug("Successfully created BukkitAudiences instance.");
+
+            if (isTongueInstalled(plugin)) {
+                this.tongue = new TongueLanguage(plugin);
+                printDebug("Tongue detected, player languages follow Tongue locales.");
+            }
         }
     }
 
@@ -255,8 +316,39 @@ public final class LanguageManager {
         }
     }
 
-    /** Localizes unnamed entity types while custom entity/player names remain caller-owned. */
-    public @NotNull Component getEntityType(@NotNull Player viewer, @NotNull org.bukkit.entity.EntityType type) {
+    /**
+     * Checked here, not in TongueLanguage, so servers without Tongue never load a class that links Tongue types.
+     * Older Tongue releases (before 1.5) lack the API the bridge needs and keep the upstream behaviour too.
+     */
+    private static boolean isTongueInstalled(@NotNull Plugin plugin) {
+        if (plugin.getServer().getPluginManager().getPlugin("Tongue") == null) {
+            return false;
+        }
+
+        try {
+            ClassLoader classLoader = LanguageManager.class.getClassLoader();
+            Class<?> keyClass = Class.forName("it.coralmc.tongue.lib.api.Key", false, classLoader);
+            Class<?> tongueClass = Class.forName("it.coralmc.tongue.lib.api.Tongue", false, classLoader);
+            Class.forName("it.coralmc.tongue.lib.bukkit.BukkitTongueService", false, classLoader).getField("REGISTERED");
+            tongueClass.getMethod("plain", Locale.class, keyClass);
+            return true;
+        } catch (ReflectiveOperationException | LinkageError ex) {
+            return false;
+        }
+    }
+
+    /**
+     * Localizes an entity type through the {@code entity.<type>} key of the owning plugin's Tongue namespace
+     * (the plugin name in lower case).
+     *
+     * @return the localized type, or null when Tongue is not installed, the plugin has no Tongue catalog,
+     * or the key is missing; callers keep their own fallback.
+     */
+    public @Nullable Component getEntityType(@NotNull Player viewer, @NotNull org.bukkit.entity.EntityType type) {
+        if (this.tongue == null) {
+            return null;
+        }
+
         return this.tongue.entityType(viewer, type);
     }
 
@@ -333,6 +425,7 @@ public final class LanguageManager {
         this.defaultLanguage = null;
         this.consoleLanguage = null;
         this.languageMap.clear();
+        this.tongueLanguageCache.clear();
 
         File dataFolder = configurationManager.getBaseFolder();
         File languageFolder = new File(dataFolder, "language");

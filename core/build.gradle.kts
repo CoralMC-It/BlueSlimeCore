@@ -236,9 +236,8 @@ paper {
     authors = listOf("SirBlobman")
 
     dependencies {
-        // LanguageManager always creates TongueLanguage, so Paper must load Tongue first and fail fast without it.
-        quickRegister(serverDependencies, "Tongue", true)
-        pluginSoftDepend.filter { it != "Tongue" }.forEach { quickRegister(serverDependencies, it, false) }
+        // Tongue is optional: LanguageManager only uses it when installed; joinClasspath exposes its API when present.
+        pluginSoftDepend.forEach { quickRegister(serverDependencies, it, false) }
     }
 
     permissions {
