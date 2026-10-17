@@ -3,6 +3,7 @@ package com.github.sirblobman.api.utility.paper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -60,7 +61,14 @@ public class PaperPluginCommand extends Command implements PluginIdentifiableCom
             throw new CommandException("Cannot execute command '" + commandLabel + "' in plugin " + plugin.getDescription().getFullName() + " - plugin is disabled.");
         }
 
-        if (!testPermission(sender)) {
+        if (!testPermissionSilent(sender)) {
+            BiConsumer<CommandSender, String> deniedHandler = commandData.getPermissionDeniedHandler();
+            if (deniedHandler == null) {
+                testPermission(sender);
+            } else {
+                deniedHandler.accept(sender, getPermission());
+            }
+
             return true;
         }
 

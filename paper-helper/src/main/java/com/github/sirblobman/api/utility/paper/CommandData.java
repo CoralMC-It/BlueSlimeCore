@@ -3,11 +3,13 @@ package com.github.sirblobman.api.utility.paper;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 
 public class CommandData {
@@ -16,6 +18,7 @@ public class CommandData {
     private String description;
     private String permission;
     private String permissionMessage;
+    private BiConsumer<CommandSender, String> permissionDeniedHandler;
 
     private CommandExecutor commandExecutor;
     private TabExecutor tabExecutor;
@@ -98,5 +101,17 @@ public class CommandData {
 
     public void setPermissionMessage(@Nullable String permissionMessage) {
         this.permissionMessage = permissionMessage;
+    }
+
+    public @Nullable BiConsumer<CommandSender, String> getPermissionDeniedHandler() {
+        return permissionDeniedHandler;
+    }
+
+    /**
+     * @param handler Sends the denial message when the sender lacks the command permission (instead of the
+     *                server's static permission message); receives the sender and the permission name.
+     */
+    public void setPermissionDeniedHandler(@Nullable BiConsumer<CommandSender, String> handler) {
+        this.permissionDeniedHandler = handler;
     }
 }
